@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BodyMeasure Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            indigo: {
+              50: '#eef2ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+            },
+            cyan: {
+              400: '#22d3ee',
+              500: '#06b6d4',
+            },
+            slate: {
+              800: '#1e293b',
+              900: '#0f172a',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            heading: ['Rajdhani', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    .human-silhouette {
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234f46e5"><path d="M12 2a5 5 0 1 0 5 5 5 5 0 0 0-5-5zm0 8a3 3 0 1 1 3-3 3 3 0 0 1-3 3zm9 11v-1a7 7 0 0 0-7-7h-4a7 7 0 0 0-7 7v1h2v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1z"/></svg>');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+    .pulse-animation {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .scan-animation {
+      animation: scan 3s ease-in-out infinite;
+    }
+    @keyframes scan {
+      0% { transform: translateY(-20px); opacity: 0; }
+      10%, 90% { opacity: 1; }
+      100% { transform: translateY(220px); opacity: 0; }
+    }
+  </style>
+</head>
+<body class="bg-slate-900 flex items-center justify-center min-h-screen font-sans text-white">
+  <div class="bg-slate-800 rounded-2xl shadow-2xl p-8 w-full max-w-md border border-slate-700 relative overflow-hidden">
+   
+    <div class="absolute inset-0 opacity-10">
+      <div class="absolute top-0 left-0 w-1 h-1 bg-cyan-400 rounded-full"></div>
+      <div class="absolute top-10 right-4 w-2 h-2 bg-indigo-500 rounded-full"></div>
+      <div class="absolute bottom-20 left-8 w-1 h-1 bg-cyan-400 rounded-full"></div>
+    </div>
+    
+    <div class="relative z-10">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h1 class="text-2xl font-bold font-heading tracking-tight">BodyMeasure <span class="text-cyan-400">Pro</span></h1>
+          <p class="text-slate-400 text-sm">Analyse biométrique en temps réel</p>
+        </div>
+        <div class="bg-indigo-500/20 p-2 rounded-lg">
+          <div class="w-8 h-8 human-silhouette"></div>
+        </div>
+      </div>
+      
+     
+      <div class="bg-slate-700/50 rounded-xl p-6 mb-6 border border-slate-600 relative h-64 overflow-hidden">
+       
+        <div class="absolute left-0 right-0 h-1 bg-cyan-400/70 rounded-full scan-animation"></div>
+        
+    
+        <div class="absolute top-1/4 left-4 w-2 h-2 bg-green-400 rounded-full pulse-animation"></div>
+        <div class="absolute top-1/2 right-4 w-2 h-2 bg-amber-400 rounded-full pulse-animation" style="animation-delay: 0.5s"></div>
+        <div class="absolute bottom-1/4 left-1/2 w-2 h-2 bg-indigo-400 rounded-full pulse-animation" style="animation-delay: 1s"></div>
+        
+       
+        <div class="flex flex-col items-center justify-center h-full">
+          <div class="text-5xl font-bold font-heading mb-2 flex items-end">
+            <span id="measureValue">--</span>
+            <span class="text-2xl text-slate-400 ml-1">cm</span>
+          </div>
+          <p id="measureType" class="text-slate-400 uppercase text-sm tracking-wider">Taille estimée</p>
+        </div>
+      </div>
+      
+    
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="bg-slate-700/30 rounded-lg p-3 border border-slate-600/50">
+          <p class="text-slate-400 text-xs mb-1">Distance obstacle</p>
+          <p class="font-medium"><span id="rawDistance">--</span> cm</p>
+        </div>
+        <div class="bg-slate-700/30 rounded-lg p-3 border border-slate-600/50">
+          <p class="text-slate-400 text-xs mb-1">Calcul</p>
+          <p class="font-medium">225 - <span id="currentDistance">--</span></p>
+        </div>
+      </div>
+      
+      
+      <button onclick="fetchDistance()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        Mesurer
+      </button>
+      
+      <div class="mt-6">
+        <p class="text-slate-400 text-sm mb-2">Dernières mesures:</p>
+        <div id="measureHistory" class="flex space-x-2 overflow-x-auto pb-2">
+         
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const measureValue = document.getElementById("measureValue");
+    const rawDistance = document.getElementById("rawDistance");
+    const currentDistance = document.getElementById("currentDistance");
+    const measureHistory = document.getElementById("measureHistory");
+    
+    let history = [];
+    const MAX_HISTORY = 3;
+    
+    async function fetchDistance() {
+      try {
+        
+        measureValue.textContent = "...";
+        rawDistance.textContent = "--";
+        currentDistance.textContent = "--";
+        
+        
+        const res = await fetch("http://192.168.137.154:8080/get-distance");
+        const data = await res.json();
+        const obstacleDistance = parseFloat(data.distance.toFixed(1));
+        console.log(obstacleDistance);
+        const bodyMeasure = (225 - obstacleDistance).toFixed(1);
+        
+        
+        rawDistance.textContent = obstacleDistance;
+        currentDistance.textContent = obstacleDistance;
+        measureValue.textContent = bodyMeasure;
+        
+        addToHistory(bodyMeasure);
+        
+      } catch (err) {
+        measureValue.textContent = "ERR";
+        rawDistance.textContent = "ERR";
+        currentDistance.textContent = "ERR";
+        console.error("Erreur de connexion:", err);
+      }
+    }
+    
+    function addToHistory(value) {
+      const now = new Date();
+      const timeString = now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0');
+      
+      history.unshift({
+        value: value,
+        time: timeString
+      });
+      
+      
+      if (history.length > MAX_HISTORY) {
+        history.pop();
+      }
+      
+      
+      updateHistoryDisplay();
+    }
+    
+    function updateHistoryDisplay() {
+      measureHistory.innerHTML = '';
+      
+      history.forEach(item => {
+        const historyItem = document.createElement('div');
+        historyItem.className = 'bg-slate-700/50 text-xs px-3 py-2 rounded-full whitespace-nowrap';
+        historyItem.textContent = `${item.value} cm (${item.time})`;
+        measureHistory.appendChild(historyItem);
+      });
+    }
+    
+    
+    setInterval(fetchDistance, 3000);
+    fetchDistance();
+  </script>
+</body>
+</html>
